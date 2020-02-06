@@ -117,34 +117,58 @@ def FIFO(comandos):
                     queue.remove(pair)
  
         if comand[0] == 'A':
-            #print (comand)
-            #print(queue)
-            if comand[3] == 0:
+
+            if comand[3] == 0: #leer
                 for pair in queue:
                     temp = pair[0]
-                    #print (temp[2])
-                    #if temp[2] == comand[2]:
-                     #print(pair)
+                    if temp[2] == comand[2]:
+                        print(temp)
+                    
+                    else:
+                        if comand[2] in pageFaults:
+                            pageFaults[comand[2]] += 1
+                        else:
+                            pageFaults[comand[2]] = 1
 
-            if comand[3] == 1:
-                print('mod')
-            for pair in queue:
-                temp = pair[0]
-                #if temp[2] == comand[2]:
+
+
+#  pair = []
+#                     memoriaActual -= comand[1]
+#                     pair.append(comand)
+#                     pair.append(millis)
+#                     queue.append(pair)
+
+            if comand[3] == 1: #modificar
+                for pair in queue:
+                    temp = pair[0]
+                    if temp[2] == comand[2]:
+                        pair = []
+                        appnd = temp[2]
+                        temp.remove(temp[1])
+                        temp.remove(temp[1])
+
+                        temp.append(comand[1])
+                        temp.append(appnd)
+
+
+                    
+                    else:
+                        if comand[2] in pageFaults:
+                            pageFaults[comand[2]] += 1
+                        else:
+                            pageFaults[comand[2]] = 1
+
 
 
         if comand[0] == 'F':
             totalP = 0
             for f in pageFaults:
                 totalP += pageFaults[f]
-            print('Page faults totales: ' + str(totalP) )
-            print('')
-            print('Page Faults por id de proceso: ')
-            for f in pageFaults:
-                print( str(f) + ' = ' + str(pageFaults[f]))
-
-
-            
+            # print('Page faults totales: ' + str(totalP) )
+            # print('')
+            # print('Page Faults por id de proceso: ')
+            # for f in pageFaults:
+            #     print( str(f) + ' = ' + str(pageFaults[f]))
 
 
         
@@ -187,15 +211,12 @@ def main():
 
         if words[0] == 'C':
             comando.append(listaLineas[0])
-            print('')
         
         if words[0] == 'E':
             comando.append(listaLineas[0])
-            print('')
 
         if words[0] == 'F':
             comando.append(listaLineas[0])
-            print('')
         
         #else:
         
