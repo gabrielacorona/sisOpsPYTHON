@@ -8,6 +8,8 @@
 # Gabriela Corona Garza A01282529
 # Marlon Omar López A00139431
 # Paulina González Dávalos A01194111
+# Jorge Arturo Ramirez A01088601
+# Victor Andres Villarreal Grimaldo A01039863
 
 
 # *************** COMENZAR ***************
@@ -52,14 +54,72 @@
 # E = se termina el programa y se despliega un mensaje de despedida
 
 
+
+
 def main():
-    memoriaActual = 2048
+    f = open("txtFiles/ArchivoTrabajo.txt", "r")
+    lines = f.read().splitlines()
 
-    f = open("ArchivoTrabajo.txt", "r")
-    words = f.read().split()
+    comandos = []
 
-    for w in words:
-        print(w)
+
+    for i, linea in enumerate(lines):
+        words = linea.rstrip()
+        words = words.lstrip()
+        words =' '.join(words.split())
+
+        """
+        L: int
+        P: int int
+        A: int int int
+
+        """ 
+        listaLineas = words.split()
+        comando = []
+
+        if words[0] == 'A':
+            comando.append(listaLineas[0])
+            comando.append(int(listaLineas[1]))
+            comando.append(int(listaLineas[2]))
+            comando.append(int(listaLineas[3]))
+
+        if words[0] == 'P':
+            comando.append(listaLineas[0])
+            comando.append(int(listaLineas[1]))
+            comando.append(int(listaLineas[2]))
+        
+        if words[0] == 'L':
+            comando.append(listaLineas[0])
+            comando.append(int(listaLineas[1]))
+
+        if words[0] == 'C':
+            comando.append(listaLineas[0])
+            print('')
+        
+        if words[0] == 'E':
+            comando.append(listaLineas[0])
+            print('')
+
+        if words[0] == 'F':
+            comando.append(listaLineas[0])
+            print('')
+        
+        #else:
+        
+        comandos.append(comando)    
+   # print(comandos)
+    FIFO(comandos)
+    LRU(comandos)        
+
+
+
+
+
+
+
+
+
+
 
 
 if __name__ == '__main__':
