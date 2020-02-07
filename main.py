@@ -54,7 +54,7 @@
 # E = se termina el programa y se despliega un mensaje de despedida
 
 
-import time
+from timeit import default_timer as timer
 
 
 def FIFO(comandos):
@@ -64,6 +64,12 @@ def FIFO(comandos):
     memoriaActual = 2048
     memoriaVirtual = 4096
 
+    """
+    start = timer()
+    # ...
+    end = timer()
+    print(end - start) # Time in seconds, e.g. 5.38091952400282
+    """
     
     """
     Como se compone nuestra estructura que simula la memoria virtual
@@ -74,16 +80,15 @@ def FIFO(comandos):
     [[['P', 32, 2], 1581113886814], [['P', 48, 3], 1581113886814]]
     """
 
-    millis = int(round(time.time() * 1000))
     for comand in comandos:
         if comand[0] == 'P': # cargar un proceso
 
             if memoriaActual - comand[1] > 0: #checa si cabe en la memoria
-                
+                start = timer()
                 pair = [] #crea el pair que se compone del comando y el timestamp
                 memoriaActual -= comand[1] #resta la memoria que ocupa ese proceso
                 pair.append(comand)
-                pair.append(millis)
+                pair.append(start)
                 queue.append(pair) #mete el pair a la queue
 
                 if comand[2] in pageFaults: #agrega al dict de pagefaults que genera cada uno de los procesos
@@ -109,19 +114,25 @@ def FIFO(comandos):
         if comand[0] == 'L': #libera de la memoria el proceso con el id correspondiente
             for pair in queue:
                 temp = (pair[0])
-                if temp[2] == comand[1]:
+                if temp[2] == comand[1]: #cada que se libera un proceso de la memoria principal se calcula su turnaround y se intercambia 
+                    end = timer()
+                    start = pair[1]
+
+                    pair.pop()
+                    pair.append(end-start)
                     memoriaV.append(pair) #mete a memoria virtual el proceso se que libero
                     memoriaVirtual -= pair[1] #actualiza la memoria actual restando los bytes que se ocuparon de la memoria virtual
                     memoriaActual += pair[1] #actualiza la memoria actual agregandole los bytes que se liberaron
                     queue.remove(pair) #saca de la queue el elemento correspondiente
+
                     
         if comand[0] == 'A': #Leer o modificar un proceso
 
             if comand[3] == 0: #leer, si no esta en la memoria principal se genera un pagefault
                 for pair in queue:
                     temp = pair[0]
-                    if temp[2] == comand[2]:
-                        # TODO DESCOMENTAR ANTES DE ENTREGAR
+                    # TODO DESCOMENTAR ANTES DE ENTREGAR
+                    #if temp[2] == comand[2]:
                         #print('Lectura de Proceso '+str(temp))
                
                 for pair in memoriaV: #si no esta en la memoria principal se genera un pagefault
@@ -166,14 +177,25 @@ def FIFO(comandos):
 # - nmero total de operaciones swap-out swap-in
 
         if comand[0] == 'F':
-            totalP = 0
+            totalPf = 0
+            totalTurn = 0
+            totalPro = 0
             for f in pageFaults:
-                totalP += pageFaults[f]
-            # print('Page faults totales: ' + str(totalP) )
+                totalPf += pageFaults[f]
+            # TODO DESCOMENTAR ANTES DE ENTREGAR
+            # print('Page faults totales: ' + str(totalPf) )
             # print('')
             # print('Page Faults por id de proceso: ')
             # for f in pageFaults:
             #     print( str(f) + ' = ' + str(pageFaults[f]))
+            #print('Turnaround por proceso')
+            for m in memoriaV:
+                temp = m[0]
+                totalTurn += m[1]
+                totalPro += 1
+                #print(str(temp[2]) + ' = ' + str(m[1]))
+            #print('Turnaround promedio')
+            #print(totalTurn / total)
 
         
 
