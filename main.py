@@ -57,6 +57,9 @@
 from timeit import default_timer as timer
 
 
+
+
+
 def FIFO(comandos):
     queue = []
     pageFaults = {}
@@ -64,20 +67,11 @@ def FIFO(comandos):
     memoriaActual = 2048
     memoriaVirtual = 4096
 
-    """
-    start = timer()
-    # ...
-    end = timer()
-    print(end - start) # Time in seconds, e.g. 5.38091952400282
-    """
     
     """
     Como se compone nuestra estructura que simula la memoria virtual
     queue de pairs
     pairs [lista con la informacion del proceso, milisegundos]
-
-    ejemplo:
-    [[['P', 32, 2], 1581113886814], [['P', 48, 3], 1581113886814]]
     """
 
     for comand in comandos:
@@ -168,13 +162,13 @@ def FIFO(comandos):
                         else:
                             pageFaults[comand[2]] = 1
 
-# *************** FIN ***************
-# despliega un reporte de estadsiticas que incluye:
-# - turnaround time de cada proceso que se consider --> diferencia de timestamps
-# - turnaround promedio
-# - nmero de page faults
-# - nmero de page faults por proceso
-# - nmero total de operaciones swap-out swap-in
+    # *************** FIN ***************
+    # despliega un reporte de estadsiticas que incluye:
+    # - turnaround time de cada proceso que se consider --> diferencia de timestamps
+    # - turnaround promedio
+    # - nmero de page faults
+    # - nmero de page faults por proceso
+    # - nmero total de operaciones swap-out swap-in
 
         if comand[0] == 'F':
             totalPf = 0
@@ -183,21 +177,207 @@ def FIFO(comandos):
             for f in pageFaults:
                 totalPf += pageFaults[f]
             # TODO DESCOMENTAR ANTES DE ENTREGAR
+
             # print('Page faults totales: ' + str(totalPf) )
             # print('')
             # print('Page Faults por id de proceso: ')
             # for f in pageFaults:
             #     print( str(f) + ' = ' + str(pageFaults[f]))
-            #print('Turnaround por proceso')
+            #print('Turnaround por proceso FIFO')
             for m in memoriaV:
                 temp = m[0]
                 totalTurn += m[1]
                 totalPro += 1
                 #print(str(temp[2]) + ' = ' + str(m[1]))
             #print('Turnaround promedio')
-            #print(totalTurn / total)
+            #print(totalTurn / totalPro)
+            #restartear las variables que simulan la memoria antes de volver a empezar con otro proceso
+            queue = []
+            pageFaults = {}
+            memoriaV = []
+            memoriaActual = 2048
+            memoriaVirtual = 4096
 
-        
+
+
+
+
+def LRU(comandos):
+    queue = []
+    pageFaults = {}
+    memoriaV = []
+    memoriaActual = 2048
+    memoriaVirtual = 4096
+
+    """
+    Como se compone nuestra estructura que simula la memoria virtual
+    queue de trios
+    trios [lista con la informacion del proceso, milisegundos desde que empezo, antiguedad]
+    """
+
+   
+
+    for comand in comandos:
+        if comand[0] == 'P': # cargar un proceso
+
+            if memoriaActual - comand[1] > 0: #checa si cabe en la memoria
+                start = timer()
+                trio = [] #crea el trio que se compone del comando y el timestamp
+                memoriaActual -= comand[1] #resta la memoria que ocupa ese proceso
+                trio.append(comand)
+                trio.append(start)
+                trio.append(start)
+                queue.append(trio) #mete el trio a la queue
+
+                if comand[2] in pageFaults: #agrega al dict de pagefaults que genera cada uno de los procesos
+                    pageFaults[comand[2]] += 1
+               
+                else:
+                    pageFaults[comand[2]] = 1
+
+            else: #si no cabe dentro de la memoria, comienza a sacar el primer elemento de la queue hasta que pueda entrar el proceso
+
+                while memoriaActual - comand[1] < 0 and  trio in queue: 
+                 #mientras que no quepa dentro de la memoria sigue sacando o mientras que haya elementos en la queue
+                        temp = trio[0]
+                        memoriaActual += temp[1]
+                        memoriaV.append(queue[0]) #mete a memoria virtual los procesos que se van sacando para meter el proceso grande
+                        queue.pop(0)
+
+                        if comand[2] in pageFaults: #agrega al dict de pagefaults que genera cada uno de los procesos
+                            pageFaults[comand[2]] += 1
+                        else:
+                            pageFaults[comand[2]] = 1
+                
+        if comand[0] == 'L': #libera de la memoria el proceso con el id correspondiente
+            oldestPro = -1
+            popId = -1
+            proTemp = []
+            for trio in queue:  #se hace inserta a la lista el tiempo que lleva el proceso dentro
+                temp = trio[0]
+                
+                end = timer()
+                start = trio[1]
+
+                trio.pop()
+                trio.append(end-start)
+
+
+            for trio in queue: #saca el id del proceso mas viejo
+                temp = trio[2]
+
+                if temp > oldestPro:
+                    oldestPro = temp
+                    proTemp = trio[0]
+                    popId = proTemp[2]
+
+
+
+
+            for trio in queue:
+                temp = (trio[0])
+                if temp[2] == popId: #saca el proceso mas viejo y se calcula su turnaround time
+                    end = timer()
+                    start = trio[1]
+                    appnd = trio[2]
+
+                    trio.pop()
+                    trio.pop()
+
+                    trio.append(end-start) #intercambia los valores para guardar el turnaround
+                    trio.append(appnd)
+                    memoriaV.append(trio) #mete a memoria virtual el proceso se que libero
+                    memoriaVirtual -= trio[1] #actualiza la memoria actual restando los bytes que se ocuparon de la memoria virtual
+                    memoriaActual += trio[1] #actualiza la memoria actual agregandole los bytes que se liberaron
+                    queue.remove(trio) #saca de la queue el elemento correspondiente
+
+                    
+        if comand[0] == 'A': #Leer o modificar un proceso
+
+            if comand[3] == 0: #leer, si no esta en la memoria principal se genera un pagefault
+                for trio in queue: 
+                    temp = trio[0]
+                    
+                    # TODO DESCOMENTAR ANTES DE ENTREGAR
+                    if temp[2] == comand[2]:
+                        #print('Lectura de Proceso '+str(temp))
+                        start = timer()
+                        trio.pop()
+                        trio.append(start)
+                        
+               
+                for trio in memoriaV: #si no esta en la memoria principal se genera un pagefault
+                    temp = trio[0]
+                    if temp[2] == comand[2]:
+                        # TODO DESCOMENTAR ANTES DE ENTREGAR
+                        #print('El proceso ' + str(temp) + ' no se encuentra en la memoria principal')
+
+                        if comand[2] in pageFaults:
+                            pageFaults[comand[2]] += 1
+                        else:
+                            pageFaults[comand[2]] = 1            
+ 
+
+            if comand[3] == 1: #modificar
+                for trio in queue:
+                    temp = trio[0]
+                    if temp[2] == comand[2]: 
+                        trio = []
+                        appnd = temp[2]
+                        #se intercambian los valores por los nuevos del comando
+                        temp.remove(temp[1])
+                        temp.remove(temp[1])
+
+                        temp.append(comand[1])
+                        temp.append(appnd)
+
+
+                    
+                    else:
+                        if comand[2] in pageFaults:
+                            pageFaults[comand[2]] += 1
+                        else:
+                            pageFaults[comand[2]] = 1
+
+    # *************** FIN ***************
+    # despliega un reporte de estadsiticas que incluye:
+    # - turnaround time de cada proceso que se consider --> diferencia de timestamps
+    # - turnaround promedio
+    # - nmero de page faults
+    # - nmero de page faults por proceso
+    # - nmero total de operaciones swap-out swap-in
+
+        if comand[0] == 'F':
+            totalPf = 0
+            totalTurn = 0
+            totalPro = 0
+            for f in pageFaults:
+                totalPf += pageFaults[f]
+            # TODO DESCOMENTAR ANTES DE ENTREGAR
+
+            # print('Page faults totales: ' + str(totalPf) )
+            # print('')
+            # print('Page Faults por id de proceso: ')
+            # for f in pageFaults:
+            #     print( str(f) + ' = ' + str(pageFaults[f]))
+            #print('Turnaround por proceso LRU')
+            for m in memoriaV:
+                temp = m[0]
+                totalTurn += m[1]
+                totalPro += 1
+                #print(str(temp[2]) + ' = ' + str(m[1]))
+            #print('Turnaround promedio')
+            #print(totalTurn / totalPro)
+            #restartear las variables que simulan la memoria antes de volver a empezar con otro proceso
+            queue = []
+            pageFaults = {}
+            memoriaV = []
+            memoriaActual = 2048
+            memoriaVirtual = 4096 
+
+
+
+
 
 
 def main():
@@ -249,6 +429,7 @@ def main():
         comandos.append(comando)    
    # print(comandos)
     FIFO(comandos)
+    LRU(comandos)
        
 
 
