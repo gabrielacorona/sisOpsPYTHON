@@ -61,6 +61,8 @@ from timeit import default_timer as timer
 
 
 def FIFO(comandos):
+    print( ' -------------- FIFO --------------')
+    print('')
     queue = []
     pageFaults = {}
     memoriaV = []
@@ -125,15 +127,13 @@ def FIFO(comandos):
             if comand[3] == 0: #leer, si no esta en la memoria principal se genera un pagefault
                 for pair in queue:
                     temp = pair[0]
-                    # TODO DESCOMENTAR ANTES DE ENTREGAR
-                    #if temp[2] == comand[2]:
-                        #print('Lectura de Proceso '+str(temp))
+                    if temp[2] == comand[2]:
+                        print('Lectura de Proceso '+str(temp))
                
                 for pair in memoriaV: #si no esta en la memoria principal se genera un pagefault
                     temp = pair[0]
                     if temp[2] == comand[2]:
-                        # TODO DESCOMENTAR ANTES DE ENTREGAR
-                        #print('El proceso ' + str(temp) + ' no se encuentra en la memoria principal')
+                        print('El proceso ' + str(temp) + ' no se encuentra en la memoria principal')
 
                         if comand[2] in pageFaults:
                             pageFaults[comand[2]] += 1
@@ -176,21 +176,32 @@ def FIFO(comandos):
             totalPro = 0
             for f in pageFaults:
                 totalPf += pageFaults[f]
-            # TODO DESCOMENTAR ANTES DE ENTREGAR
 
-            # print('Page faults totales: ' + str(totalPf) )
-            # print('')
-            # print('Page Faults por id de proceso: ')
-            # for f in pageFaults:
-            #     print( str(f) + ' = ' + str(pageFaults[f]))
-            #print('Turnaround por proceso FIFO')
+            print('Page faults totales: ' + str(totalPf) )
+            print('')
+            print('Page Faults por id de proceso: ')
+            print('')
+
+            for f in pageFaults:
+                print( str(f) + ' = ' + str(pageFaults[f]))
+            print('')
+            print('Turnaround por proceso FIFO')
             for m in memoriaV:
                 temp = m[0]
                 totalTurn += m[1]
                 totalPro += 1
-                #print(str(temp[2]) + ' = ' + str(m[1]))
-            #print('Turnaround promedio')
-            #print(totalTurn / totalPro)
+                print(str(temp[2]) + ' = ' + str(m[1]))
+            for m in queue:
+                temp = m[0]
+                totalTurn += m[1]
+                totalPro += 1
+                print(str(temp[2]) + ' = ' + str(m[1]))  
+            
+            print('')
+            if totalPro != 0:
+                print('Turnaround promedio')
+                print(totalTurn / totalPro)
+                print('')
             #restartear las variables que simulan la memoria antes de volver a empezar con otro proceso
             queue = []
             pageFaults = {}
@@ -203,6 +214,8 @@ def FIFO(comandos):
 
 
 def LRU(comandos):
+    print( ' -------------- LRU --------------')
+    print('')
     queue = []
     pageFaults = {}
     memoriaV = []
@@ -298,9 +311,8 @@ def LRU(comandos):
                 for trio in queue: 
                     temp = trio[0]
                     
-                    # TODO DESCOMENTAR ANTES DE ENTREGAR
                     if temp[2] == comand[2]:
-                        #print('Lectura de Proceso '+str(temp))
+                        print('Lectura de Proceso '+str(temp))
                         start = timer()
                         trio.pop()
                         trio.append(start)
@@ -309,8 +321,7 @@ def LRU(comandos):
                 for trio in memoriaV: #si no esta en la memoria principal se genera un pagefault
                     temp = trio[0]
                     if temp[2] == comand[2]:
-                        # TODO DESCOMENTAR ANTES DE ENTREGAR
-                        #print('El proceso ' + str(temp) + ' no se encuentra en la memoria principal')
+                        print('El proceso ' + str(temp) + ' no se encuentra en la memoria principal')
 
                         if comand[2] in pageFaults:
                             pageFaults[comand[2]] += 1
@@ -353,21 +364,32 @@ def LRU(comandos):
             totalPro = 0
             for f in pageFaults:
                 totalPf += pageFaults[f]
-            # TODO DESCOMENTAR ANTES DE ENTREGAR
 
-            # print('Page faults totales: ' + str(totalPf) )
-            # print('')
-            # print('Page Faults por id de proceso: ')
-            # for f in pageFaults:
-            #     print( str(f) + ' = ' + str(pageFaults[f]))
-            #print('Turnaround por proceso LRU')
+            print('Page faults totales: ' + str(totalPf) )
+            print('')
+            print('Page Faults por id de proceso: ')
+            print('')
+
+            for f in pageFaults:
+                print( str(f) + ' = ' + str(pageFaults[f]))
+
+            print('Turnaround por proceso LRU')
+            print('')
             for m in memoriaV:
                 temp = m[0]
                 totalTurn += m[1]
                 totalPro += 1
-                #print(str(temp[2]) + ' = ' + str(m[1]))
-            #print('Turnaround promedio')
-            #print(totalTurn / totalPro)
+                print(str(temp[2]) + ' = ' + str(m[1]))
+
+            for m in queue:
+                temp = m[0]
+                totalTurn += m[1]
+                totalPro += 1
+                print(str(temp[2]) + ' = ' + str(m[1]))                
+            print('')
+            if totalPro != 0:
+                print('Turnaround promedio')
+                print(totalTurn / totalPro)
             #restartear las variables que simulan la memoria antes de volver a empezar con otro proceso
             queue = []
             pageFaults = {}
